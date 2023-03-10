@@ -56,6 +56,10 @@ const obj = { a: 1, b: 2, c: 3, d: 4 };
   const anotherObj = { c: 5, e: 6 };
   const merge = { ...obj, ...anotherObj };
   console.log(merge);
+
+  Object.assign(dest, ...sources);
+  Object.assign(obj, anotherObj);
+  const merge = Object.assign({}, obj, anotherObj);
 }
 
 {
