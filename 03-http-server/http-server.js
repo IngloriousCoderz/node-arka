@@ -1,4 +1,7 @@
 const http = require("http");
+require("dotenv").config();
+
+const DEFAULT_PORT = 3000;
 
 const server = http.createServer((req, res) => {
   if (req.url === "/tasks") {
@@ -14,6 +17,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(3000, () => {
+server.listen(process.env.SERVER_PORT || DEFAULT_PORT, () => {
   console.log("Server is listening!");
 });
