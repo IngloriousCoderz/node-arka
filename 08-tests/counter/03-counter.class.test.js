@@ -1,7 +1,12 @@
 const Counter = require("./03-counter.class");
 
+let counter;
+
+beforeEach(() => {
+  counter = new Counter();
+});
+
 test("it should increment its value", () => {
-  const counter = new Counter();
   const result = 1;
 
   counter.increment();
@@ -10,7 +15,6 @@ test("it should increment its value", () => {
 });
 
 test("it should decrement its value", () => {
-  const counter = new Counter();
   const result = -1;
 
   counter.decrement();
