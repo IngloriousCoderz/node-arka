@@ -1,7 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 
-const { getTasks, getTask } = require("./db");
+const {
+  getTasks,
+  getTask,
+  createTask,
+  replaceTask,
+  updateTask,
+  deleteTask,
+} = require("./db");
 
 const DEFAULT_PORT = 3000;
 
@@ -21,66 +28,27 @@ app.get("/tasks/:id", async (req, res) => {
   res.send(task);
 });
 
-app.post("/tasks", (req, res) => {
-  const stmt = db.prepare("INSERT INTO tasks VALUES (?, ?)");
-
-  stmt.run(Object.values(req.body), (err) => {
-    res.send({ ...req.body, id: stmt.lastID });
-  });
+app.post("/tasks", async (req, res) => {
+  const newTask = await createTask(req.body);
+  res.send(newTask);
 });
 
-app.put("/tasks/:id", (req, res) => {
-  const stmt = db.prepare(
-    "UPDATE tasks SET text = ?, completed = ? WHERE rowid = ?",
-    [req.body.text, req.body.completed, Number(req.params.id)]
-  );
-
-  stmt.run((err) => {
-    db.get(
-      "SELECT rowid AS id, text, completed FROM tasks WHERE rowid = :id",
-      Number(req.params.id),
-      (err, row) => {
-        res.send({ ...row, completed: !!row.completed });
-      }
-    );
-  });
+app.put("/tasks/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const replacedTask = await replaceTask(id, req.body);
+  res.send(replacedTask);
 });
 
-app.patch("/tasks/:id", (req, res) => {
-  const keys = Object.keys(req.body)
-    .map((key) => `${key} = ?`)
-    .join(", ");
-  const stmt = db.prepare(`UPDATE tasks SET ${keys} WHERE rowid = ?`, [
-    ...Object.values(req.body),
-    Number(req.params.id),
-  ]);
-
-  stmt.run((err) => {
-    db.get(
-      "SELECT rowid AS id, text, completed FROM tasks WHERE rowid = :id",
-      Number(req.params.id),
-      (err, row) => {
-        res.send({ ...row, completed: !!row.completed });
-      }
-    );
-  });
+app.patch("/tasks/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const updatedTask = await updateTask(id, req.body);
+  res.send(updatedTask);
 });
 
-app.delete("/tasks/:id", (req, res) => {
-  db.get(
-    "SELECT rowid AS id, text, completed FROM tasks WHERE rowid = :id",
-    Number(req.params.id),
-    (err, row) => {
-      const stmt = db.prepare(
-        "DELETE FROM tasks WHERE rowid = ?",
-        Number(req.params.id)
-      );
-
-      stmt.run((err) => {
-        res.send({ ...row, completed: !!row.completed });
-      });
-    }
-  );
+app.delete("/tasks/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const deletedTask = await deleteTask(id);
+  res.send(deletedTask);
 });
 
 app.listen(process.env.SERVER_PORT || DEFAULT_PORT, () => {
